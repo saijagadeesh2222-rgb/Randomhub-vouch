@@ -14,7 +14,7 @@ VOUCH_CHANNEL_ID = 1479868238396653578
 VOUCH_COUNT = 435
 ORDER_NUMBER = 436
 TOTAL_SALES = 435
-TOTAL_REVENUE = 1563$
+TOTAL_REVENUE = 1563
 
 SELLERS = [
 1435466065990652044,
@@ -34,7 +34,6 @@ PRODUCTS = {
 
 PAYMENTS = ["LTC","BTC","PayPal","USDT","ETH"]
 
-# Huge review generator
 START = [
 "super","very","extremely","honestly","actually",
 "definitely","ngl","fr","legit","really"
@@ -76,26 +75,16 @@ class VouchBot(commands.Bot):
 
     async def get_random_member(self, guild):
 
-        members = []
+        members = [m for m in guild.members if not m.bot]
 
-        async for member in guild.fetch_members(limit=None):
-
-            if member.bot:
-                continue
-
-            if member.guild_permissions.administrator:
-                continue
-
-            members.append(member)
+        if not members:
+            return None
 
         return random.choice(members)
 
     async def send_vouch(self):
 
-        global VOUCH_COUNT
-        global ORDER_NUMBER
-        global TOTAL_REVENUE
-        global TOTAL_SALES
+        global VOUCH_COUNT, ORDER_NUMBER, TOTAL_REVENUE, TOTAL_SALES
 
         vouch_channel = self.get_channel(VOUCH_CHANNEL_ID)
         log_channel = self.get_channel(LOG_CHANNEL_ID)
@@ -105,6 +94,9 @@ class VouchBot(commands.Bot):
 
         guild = vouch_channel.guild
         member = await self.get_random_member(guild)
+
+        if not member:
+            return
 
         product = random.choice(list(PRODUCTS.keys()))
         min_price,max_price = PRODUCTS[product]
@@ -122,124 +114,4 @@ class VouchBot(commands.Bot):
         ORDER_NUMBER += 1
         VOUCH_COUNT += 1
 
-        transaction = ''.join(random.choices(string.ascii_uppercase + string.digits,k=10))
-
-        embed = discord.Embed(
-            title="⭐ Verified Customer Review",
-            description=f"**{generate_review()}**",
-            color=discord.Color.gold()
-        )
-
-        embed.set_author(
-            name=f"{member.name}",
-            icon_url=member.display_avatar.url
-        )
-
-        embed.add_field(name="👤 Customer",value=member.mention)
-        embed.add_field(name="🧑‍💼 Seller",value=f"<@{seller_id}>")
-
-        embed.add_field(name="📦 Product",value=product,inline=False)
-
-        embed.add_field(name="⭐ Rating",value=f"{rating}/5")
-        embed.add_field(name="💰 Price",value=f"${price}")
-        embed.add_field(name="💳 Payment",value=payment)
-
-        embed.add_field(
-            name="🧾 Order Info",
-            value=f"Order #: **{ORDER_NUMBER}**\nTransaction: **{transaction}**",
-            inline=False
-        )
-
-        embed.add_field(
-            name="📊 Total Vouches",
-            value=f"**{VOUCH_COUNT}+**",
-            inline=False
-        )
-
-        embed.set_thumbnail(url=member.display_avatar.url)
-
-        embed.set_footer(text="Random Hub Marketplace • Verified Purchase")
-
-        embed.timestamp = discord.utils.utcnow()
-
-        async with vouch_channel.typing():
-            await asyncio.sleep(random.uniform(2,6))
-
-        msg = await vouch_channel.send(embed=embed)
-
-        await asyncio.sleep(random.uniform(5,12))
-
-        await msg.reply(
-            f"Thank you for purchasing **{product}**! If you need help contact the seller.",
-            mention_author=False
-        )
-
-        if log_channel:
-
-            log = discord.Embed(
-                title="🛒 Purchase Log",
-                color=discord.Color.blue()
-            )
-
-            log.add_field(name="Customer",value=member.mention)
-            log.add_field(name="Seller",value=f"<@{seller_id}>")
-            log.add_field(name="Product",value=product)
-            log.add_field(name="Price",value=f"${price}")
-            log.add_field(name="Payment",value=payment)
-
-            log.timestamp = discord.utils.utcnow()
-
-            await log_channel.send(embed=log)
-
-    async def auto_vouch_loop(self):
-
-        while self.running:
-
-            daily_vouches = random.randint(10,18)
-
-            for _ in range(daily_vouches):
-
-                wait = random.uniform(1,3) * 3600
-                await asyncio.sleep(wait)
-
-                if self.running:
-                    await self.send_vouch()
-
-bot = VouchBot()
-
-@bot.command()
-async def start(ctx):
-
-    if bot.running:
-        await ctx.send("Auto vouch already running.")
-        return
-
-    bot.running = True
-
-    await ctx.send("✅ Auto vouch system started.")
-
-    bot.loop.create_task(bot.auto_vouch_loop())
-
-@bot.command()
-async def stop(ctx):
-
-    bot.running = False
-    await ctx.send("⛔ Auto vouch stopped.")
-
-@bot.tree.command(name="stats",description="Marketplace statistics")
-async def stats(interaction: discord.Interaction):
-
-    embed = discord.Embed(
-        title="📊 Marketplace Stats",
-        color=discord.Color.green()
-    )
-
-    embed.add_field(name="Total Vouches",value=f"{VOUCH_COUNT}+")
-    embed.add_field(name="Total Sales",value=TOTAL_SALES)
-    embed.add_field(name="Revenue",value=f"${round(TOTAL_REVENUE,2)}")
-
-    embed.timestamp = discord.utils.utcnow()
-
-    await interaction.response.send_message(embed=embed)
-
-bot.run(TOKEN)
+        transaction = ''.join(random.choices(string.ascii_uppercase +
