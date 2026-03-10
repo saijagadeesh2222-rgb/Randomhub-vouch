@@ -11,10 +11,10 @@ TOKEN = os.getenv("TOKEN")
 LOG_CHANNEL_ID = 1480475760618770629
 VOUCH_CHANNEL_ID = 1479868238396653578
 
-VOUCH_COUNT = 436
+VOUCH_COUNT = 435
 ORDER_NUMBER = 436
-TOTAL_SALES = 0
-TOTAL_REVENUE = 0
+TOTAL_SALES = 435
+TOTAL_REVENUE = 1563$
 
 SELLERS = [
 1435466065990652044,
@@ -199,7 +199,7 @@ class VouchBot(commands.Bot):
 
             for _ in range(daily_vouches):
 
-                wait = random.uniform(1,3) * 3600
+                wait = random.uniform(10,20)
                 await asyncio.sleep(wait)
 
                 if self.running:
