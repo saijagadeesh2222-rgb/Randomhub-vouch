@@ -197,7 +197,7 @@ class VouchBot(commands.Bot):
 
             for _ in range(daily_vouches):
 
-                wait = random.uniform(10,20)
+                wait = random.uniform(1,3) * 3600
                 await asyncio.sleep(wait)
 
                 if self.running:
